@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# Secrets / credentials (NEVER commit)
+.cookies/
+cookies.json
+*.session
+.env
+
+# Drafts are user content, keep local
+drafts/
+!drafts/.gitkeep
+
+# Playwright
+playwright-report/
+test-results/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

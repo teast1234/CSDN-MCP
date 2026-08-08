@@ -1,0 +1,42 @@
+[project]
+name = "csdn-blog-mcp"
+version = "0.1.0"
+description = "CSDN Blog MCP Server - AI Agent bridge for writing and publishing CSDN blog posts"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+authors = [
+    {name = "abuibuibui"},
+]
+keywords = ["csdn", "blog", "mcp", "ai", "seo", "publish", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = [
+    "mcp>=1.0.0,<2.0.0",
+    "playwright>=1.40.0",
+    "httpx>=0.27.0",
+]
+
+[project.urls]
+Homepage = "https://gitee.com/gdouage/csdn-mcp"
+Repository = "https://gitee.com/gdouage/csdn-mcp"
+Issues = "https://gitee.com/gdouage/csdn-mcp/issues"
+
+[project.scripts]
+csdn-blog-mcp = "csdn_blog_mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
