@@ -14,7 +14,7 @@ from csdn_blog_mcp.writer import generate_blog_scaffold, write_blog
 from csdn_blog_mcp.seo import seo_check
 from csdn_blog_mcp.library import list_drafts, read_draft, delete_draft
 from csdn_blog_mcp.auth import check_login, login, has_saved_session, clear_session
-from csdn_blog_mcp.publisher import publish_csdn
+from csdn_blog_mcp.publisher import publish_csdn, diagnose_editor
 from csdn_blog_mcp.stats import csdn_stats
 from csdn_blog_mcp.style import get_style_guide
 from csdn_blog_mcp import config
@@ -276,6 +276,30 @@ def tool_publish_csdn(
     """
     return publish_csdn(file_path, tags, category, visibility, as_draft,
                         headless, timeout_ms, skip_rate_limit)
+
+
+@mcp.tool()
+def tool_diagnose_editor(headless: bool = True, timeout_ms: int = 60000) -> dict:
+    """Diagnose the CSDN markdown editor to detect UI drift / broken selectors.
+
+    Opens the CSDN editor with your saved session and probes every key element
+    (title display/input, content editor, save-draft button/item, publish
+    button, tag/category inputs, dialog publish button). For each selector it
+    reports which fallback matched (or none), so when publish_csdn starts
+    failing you can run this to see exactly which selectors CSDN changed and
+    update SELECTORS in publisher.py accordingly.
+
+    Requires a saved session — call csdn_login first.
+
+    Args:
+        headless: Run headless (default True). Set False to watch.
+        timeout_ms: Per-action timeout in milliseconds.
+
+    Returns:
+        dict with {ok, url, results: {element: matched_selector | null},
+        needs_login?, message?}
+    """
+    return diagnose_editor(headless, timeout_ms)
 
 
 @mcp.tool()

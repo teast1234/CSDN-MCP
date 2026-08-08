@@ -58,11 +58,11 @@ get_style_guide → generate_blog_scaffold → fill body → write_blog → seo_
                        ▼
 ┌──────────────────────────────────────────────┐
 │            csdn-blog-mcp Server               │
-│              (FastMCP, 13 tools)               │
+│              (FastMCP, 14 tools)               │
 ├──────────┬──────────┬──────────┬──────────────┤
 │  Write   │  Drafts  │ Publish/ │   Stats/     │
 │          │          │  Login   │   RateLimit  │
-│ (4 tools)│ (3 tools)│ (4 tools)│  (2 tools)  │
+│ (4 tools)│ (3 tools)│ (5 tools)│  (2 tools)  │
 ├──────────┴──────────┴──────────┴──────────────┤
 │                  Core layer                     │
 │  Markdown parsing │ YAML front-matter │ Playwright │
@@ -172,7 +172,7 @@ Ask the AI to call `csdn_login`; a browser opens for manual CSDN login (first lo
 
 ---
 
-## 📡 The 13 tools
+## 📡 The 14 tools
 
 ### Writing (4)
 
@@ -191,7 +191,7 @@ Ask the AI to call `csdn_login`; a browser opens for manual CSDN login (first lo
 | `read_draft` | Read a draft's content + metadata |
 | `delete_draft` | Delete a draft |
 
-### Publishing & login (4)
+### Publishing & login (5)
 
 | Tool | Purpose |
 |------|------|
@@ -199,6 +199,7 @@ Ask the AI to call `csdn_login`; a browser opens for manual CSDN login (first lo
 | `csdn_login` | Open a visible browser to log in manually, save the session |
 | `clear_csdn_session` | Clear the saved session |
 | `publish_csdn` | Browser automation to send a draft to CSDN: **default saves to draft box** (not public); `as_draft=False` publishes directly |
+| `diagnose_editor` | Probe every key element of the CSDN editor and report which selector matched — run it when `publish_csdn` fails to find which selector CSDN changed |
 
 ### Stats & rate limit (2)
 
@@ -253,7 +254,9 @@ publish_csdn(file_path)   # publish once both are OK
 - **Session persistence**: login state saved as standard Playwright storageState JSON, git-ignored, prompts re-login when expired
 - **Rate limiting**: applies only to **direct publish** (default 2/day, ≥ 30 min apart); saving drafts is unlimited
 - **Failure evidence**: a screenshot is auto-saved to `.cookies/screenshots/` on publish failure
-- **Centralized selectors**: `SELECTORS` dict at the top of `publisher.py`; update there when CSDN changes its UI
+- **Centralized selectors**: `SELECTORS` dict at the top of `publisher.py`; key elements carry multiple fallback selectors, update there when CSDN changes its UI
+- **UI-drift resilience**: fixed viewport + network-level ad blocking + auto overlay dismissal + multi-selector fallback + robust click retries, mitigating resolution changes / ads / minor redesigns
+- **Self-diagnosis**: `diagnose_editor` probes each editor element and reports hits; run it when `publish_csdn` fails to find which selector CSDN changed
 - **Human-like pacing**: random 0.8-2.2s delays between actions to reduce anti-automation triggers
 
 ---
@@ -265,7 +268,7 @@ publish_csdn(file_path)   # publish once both are OK
 | Ban | CSDN rate-limits bulk publishing | Default 2/day, 30 min apart, varied content |
 | Captcha | Login/publish may show a slider captcha | Automation can't solve it; manual handling (csdn_login opens a browser) |
 | ToS | ToS prohibits unauthorized automated publishing | Plan A is lowest risk; default saves to draft box only |
-| UI drift | CSDN editor changes | Centralized selectors + failure screenshots |
+| UI drift | CSDN editor changes | Multi-selector fallback + failure screenshots + `diagnose_editor` self-diagnosis |
 
 **Pragmatic path**: start with the "writing" part only (zero risk), keep the final publish click manual. Enable auto-publish once stable.
 

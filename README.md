@@ -58,10 +58,10 @@ get_style_guide → generate_blog_scaffold → 填充正文 → write_blog → s
                        ▼
 ┌──────────────────────────────────────────────┐
 │            csdn-blog-mcp Server               │
-│              (FastMCP, 13 个工具)              │
+│              (FastMCP, 14 个工具)              │
 ├──────────┬──────────┬──────────┬──────────────┤
 │  写博文   │  草稿库   │  发布登录  │   统计/限流    │
-│ (4 tools)│ (3 tools)│ (4 tools)│  (2 tools)  │
+│ (4 tools)│ (3 tools)│ (5 tools)│  (2 tools)  │
 ├──────────┴──────────┴──────────┴──────────────┤
 │                  底层能力                       │
 │  Markdown 解析 │ YAML front-matter │ Playwright │
@@ -171,7 +171,7 @@ python -m venv .venv
 
 ---
 
-## 📡 13 个工具一览
+## 📡 14 个工具一览
 
 ### 写博文（4 个）
 
@@ -190,7 +190,7 @@ python -m venv .venv
 | `read_draft` | 读取草稿内容 + 元数据 |
 | `delete_draft` | 删除草稿 |
 
-### 发布与登录（4 个）
+### 发布与登录（5 个）
 
 | 工具 | 功能 |
 |------|------|
@@ -198,6 +198,7 @@ python -m venv .venv
 | `csdn_login` | 打开可见浏览器手动登录，保存 session |
 | `clear_csdn_session` | 清除已保存 session |
 | `publish_csdn` | 浏览器自动化把草稿发到 CSDN：**默认存草稿箱**（不公开），`as_draft=False` 时直接发布 |
+| `diagnose_editor` | 探测 CSDN 编辑器各关键元素，报告每个选择器是否命中——`publish_csdn` 失败时跑它定位是哪个选择器被改版了 |
 
 ### 统计与限流（2 个）
 
@@ -252,7 +253,9 @@ publish_csdn(file_path)   # 都 OK 再发
 - **session 持久化**：登录态存为 Playwright 标准 storageState JSON，git 忽略，过期提示重登
 - **频率限制**：仅对**直接发布**生效（默认每天 2 篇、间隔 ≥ 30 分钟）；存草稿箱不限频
 - **失败存证**：发布失败自动截图到 `.cookies/screenshots/`，方便排查选择器失效
-- **选择器集中**：`publisher.py` 顶部 `SELECTORS` 字典统一管理，CSDN 改版只需改这里
+- **选择器集中**：`publisher.py` 顶部 `SELECTORS` 字典统一管理，关键元素配多组回退选择器，CSDN 改版只需改这里
+- **抗 UI 漂移**：固定视口 + 网络层广告拦截 + 弹层自动关闭 + 多选择器回退 + 鲁棒点击重试，缓解分辨率变化/广告/小改版导致的失效
+- **自诊断**：`diagnose_editor` 探测编辑器各元素命中情况，`publish_csdn` 失败时跑它定位是哪个选择器被改版了
 - **拟人节奏**：每步操作间随机延迟 0.8-2.2 秒，降低风控触发概率
 
 ---
@@ -264,7 +267,7 @@ publish_csdn(file_path)   # 都 OK 再发
 | 封号 | CSDN 对批量发文有风控 | 默认每天 2 篇、间隔 30 分钟、内容差异化 |
 | 验证码 | 登录/发布可能弹滑块验证码 | 自动化过不了，需人工介入（csdn_login 弹浏览器） |
 | ToS | 协议禁止未授权自动化发布 | 方案 A 风险最低；默认只存草稿箱 |
-| UI 漂移 | CSDN 编辑器改版 | 选择器集中管理 + 失败截图存证 |
+| UI 漂移 | CSDN 编辑器改版 | 多选择器回退 + 失败截图存证 + `diagnose_editor` 自诊断 |
 
 **最务实路径**：先只用「写博文」部分（零风险），发布那一下保留人工点击。稳定运行后再开自动发布。
 
