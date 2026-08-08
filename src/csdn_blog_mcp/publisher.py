@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 from . import config, auth
+from .util import run_in_thread
 from .writer import _split_front_matter
 
 # Fixed viewport → deterministic layout regardless of the host screen.
@@ -242,6 +243,7 @@ def _strip_h1(content: str) -> str:
     return "\n".join(lines)
 
 
+@run_in_thread
 def diagnose_editor(headless: bool = True, timeout_ms: int = 30000) -> dict:
     """Open the CSDN editor headless and report which key selectors resolve.
 
@@ -290,6 +292,7 @@ def diagnose_editor(headless: bool = True, timeout_ms: int = 30000) -> dict:
         return {"ok": False, "message": f"Diagnose failed: {e}"}
 
 
+@run_in_thread
 def publish_csdn(
     file_path: str,
     tags: list[str] | None = None,

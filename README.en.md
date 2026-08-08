@@ -87,6 +87,7 @@ csdn-blog-mcp/
 │   ├── publisher.py       # publish_csdn (Playwright, Plan A)
 │   ├── stats.py           # csdn_stats (public API)
 │   ├── style.py           # get_style_guide loader
+│   ├── util.py            # run_in_thread: run browser tools off the MCP asyncio loop
 │   └── config.py          # paths / cookie store / rate limit
 ├── STYLE_GUIDE.md         # Writing-style prompt distilled from the author's posts
 ├── drafts/                # Local drafts (git-ignored)
@@ -257,6 +258,7 @@ publish_csdn(file_path)   # publish once both are OK
 - **Centralized selectors**: `SELECTORS` dict at the top of `publisher.py`; key elements carry multiple fallback selectors, update there when CSDN changes its UI
 - **UI-drift resilience**: fixed viewport + network-level ad blocking + auto overlay dismissal + multi-selector fallback + robust click retries, mitigating resolution changes / ads / minor redesigns
 - **Self-diagnosis**: `diagnose_editor` probes each editor element and reports hits; run it when `publish_csdn` fails to find which selector CSDN changed
+- **Asyncio-loop escape**: the MCP server runs tool functions inside an asyncio event loop, but Playwright's sync API refuses to start inside a running loop; the `util.run_in_thread` decorator dispatches browser tools to a fresh thread when a loop is running (and runs them directly in standalone scripts — zero overhead)
 - **Human-like pacing**: random 0.8-2.2s delays between actions to reduce anti-automation triggers
 
 ---

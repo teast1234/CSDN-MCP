@@ -86,6 +86,7 @@ csdn-blog-mcp/
 │   ├── publisher.py       # 发布：publish_csdn（Playwright 方案 A）
 │   ├── stats.py           # 统计：csdn_stats（公开 API）
 │   ├── style.py           # 风格指南加载：get_style_guide
+│   ├── util.py            # run_in_thread：让浏览器工具绕开 MCP 的 asyncio 循环
 │   └── config.py          # 路径 / cookie 存储 / 频率限制
 ├── STYLE_GUIDE.md         # 从作者博文提炼的写作风格提示词（MCP 自用）
 ├── drafts/                # 本地草稿存放处（git 忽略）
@@ -256,6 +257,7 @@ publish_csdn(file_path)   # 都 OK 再发
 - **选择器集中**：`publisher.py` 顶部 `SELECTORS` 字典统一管理，关键元素配多组回退选择器，CSDN 改版只需改这里
 - **抗 UI 漂移**：固定视口 + 网络层广告拦截 + 弹层自动关闭 + 多选择器回退 + 鲁棒点击重试，缓解分辨率变化/广告/小改版导致的失效
 - **自诊断**：`diagnose_editor` 探测编辑器各元素命中情况，`publish_csdn` 失败时跑它定位是哪个选择器被改版了
+- **绕开 asyncio 循环**：MCP 服务在 asyncio 事件循环里跑工具函数，而 Playwright 的 sync API 拒绝在运行中的循环里启动；`util.run_in_thread` 装饰器检测到循环时把浏览器工具丢到独立线程执行，无循环时（独立脚本）直接跑，零开销
 - **拟人节奏**：每步操作间随机延迟 0.8-2.2 秒，降低风控触发概率
 
 ---

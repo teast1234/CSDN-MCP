@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 
 from . import config
+from .util import run_in_thread
 
 CSDN_HOME = "https://www.csdn.net/"
 CSDN_EDITOR = "https://mp.csdn.net/mp_blog/creator/editor"
@@ -59,6 +60,7 @@ def clear_session() -> dict:
     return {"ok": True, "message": "No session to clear"}
 
 
+@run_in_thread
 def check_login(headless: bool = True, timeout_ms: int = 30000) -> dict:
     """Open a browser, load CSDN, and report whether the user is logged in.
 
@@ -111,6 +113,7 @@ def check_login(headless: bool = True, timeout_ms: int = 30000) -> dict:
         return {"ok": False, "message": f"Login check failed: {e}", "logged_in": False}
 
 
+@run_in_thread
 def login(headless: bool = False, timeout_ms: int = 180000) -> dict:
     """Open a visible browser for the user to log into CSDN manually.
 
