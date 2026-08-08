@@ -187,6 +187,13 @@ def _new_context(pw, headless: bool, state):
     browser = pw.chromium.launch(headless=headless)
     context = browser.new_context(viewport=VIEWPORT, storage_state=state) \
         if state else browser.new_context(viewport=VIEWPORT)
+    # Allow clipboard write so we can paste the markdown body in one shot
+    # (typing char-by-char triggers the editor's auto-indent/auto-list and
+    # mangles the markdown — doubled list markers, runaway code-block indent).
+    try:
+        context.grant_permissions(["clipboard-read", "clipboard-write"])
+    except Exception:
+        pass
     return browser, context
 
 
@@ -445,7 +452,20 @@ def publish_csdn(
             page.keyboard.press("Control+a")
             page.keyboard.press("Delete")
             _human_delay(0.3, 0.6)
-            page.keyboard.type(body_for_editor, delay=3)
+            # Paste the body via clipboard in one shot. Typing char-by-char
+            # (page.keyboard.type) triggers the editor's auto-indent / auto-list
+            # and mangles markdown (doubled "- " list markers, runaway
+            # indentation inside code blocks, extra blank lines).
+            pasted = False
+            try:
+                page.evaluate("(t) => navigator.clipboard.writeText(t)", body_for_editor)
+                page.keyboard.press("Control+v")
+                _human_delay(0.8, 1.4)
+                pasted = True
+            except Exception:
+                pass
+            if not pasted:
+                page.keyboard.type(body_for_editor, delay=3)
             _human_delay()
 
             # 7. Save as draft OR publish directly.

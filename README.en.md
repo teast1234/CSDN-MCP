@@ -259,6 +259,7 @@ publish_csdn(file_path)   # publish once both are OK
 - **UI-drift resilience**: fixed viewport + network-level ad blocking + auto overlay dismissal + multi-selector fallback + robust click retries, mitigating resolution changes / ads / minor redesigns
 - **Self-diagnosis**: `diagnose_editor` probes each editor element and reports hits; run it when `publish_csdn` fails to find which selector CSDN changed
 - **Asyncio-loop escape**: the MCP server runs tool functions inside an asyncio event loop, but Playwright's sync API refuses to start inside a running loop; the `util.run_in_thread` decorator dispatches browser tools to a fresh thread when a loop is running (and runs them directly in standalone scripts — zero overhead)
+- **Paste the body via clipboard**: typing markdown char-by-char with `keyboard.type` triggers the editor's auto-indent/auto-list and mangles it (list `-` becomes `- -`, runaway code-block indent); instead the body is written to the clipboard and pasted with `Ctrl+V` in one shot, preserving the original markdown
 - **Human-like pacing**: random 0.8-2.2s delays between actions to reduce anti-automation triggers
 
 ---
